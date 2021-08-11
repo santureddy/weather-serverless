@@ -1,0 +1,50 @@
+service:
+  name: weather-serverless
+
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
+  environment:
+    WEATHER_TABLE_NAME: ${self:custom.WeatherTable.name}
+  iamRoleStatements:
+    - ${file(iam/WeatherTableIAM.yml):WeatherTableIAM}
+
+resources:
+  Resources:
+    WeatherTable: ${file(resources/WeatherTable.yml):WeatherTable}
+    
+functions:
+  getWeather:
+    handler: src/handlers/getWeather.handler
+    events:
+      - http:
+          method: GET
+          path: /getWeather
+          request:
+            parameters:
+              querystrings:
+                zip: true
+  getWeatherReport:
+    handler: src/handlers/getWeatherReport.handler
+    events:
+      - http:
+          method: GET
+          path: /getWeatherReport
+          request:
+            parameters:
+              querystrings:
+                zip: true
+
+custom:
+  WeatherTable:
+    name: !Ref WeatherTable
+    arn: !GetAtt WeatherTable.Arn
+        

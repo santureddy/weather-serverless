@@ -1,0 +1,10 @@
+WeatherTableIAM:
+  Effect: Allow
+  Action: 
+    - dynamodb:PutItem
+    - dynamodb:Scan
+    - dynamodb:GetItem
+    - dynamodb:Query
+  Resource:
+    - ${self:custom.WeatherTable.arn}
+    - !Join ['/', [ '${self:custom.WeatherTable.arn}', 'index', 'zipcode' ]]
